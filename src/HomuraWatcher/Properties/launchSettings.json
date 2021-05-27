@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "HomuraWatcher": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}

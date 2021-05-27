@@ -1,0 +1,25 @@
+version: '3.4'
+
+services:
+  api:
+    image: ${DOCKER_REGISTRY-}homuraapi
+    build:
+      context: .
+      dockerfile: src/HomuraApi/Dockerfile
+    ports:
+      - "5000:80"
+      - "5001:443"
+    volumes:
+      -  ./data:/data
+    env_file:
+      - secrets.env
+
+  watcher:
+    image: ${DOCKER_REGISTRY-}homurawatcher
+    build:
+      context: .
+      dockerfile: src/HomuraWatcher/Dockerfile
+    env_file:
+      - secrets.env
+    depends_on:
+      - api
