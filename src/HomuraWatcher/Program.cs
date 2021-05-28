@@ -22,7 +22,8 @@ namespace HomuraWatcher
             Client.DefaultRequestHeaders.Accept.Clear();
             Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             Client.DefaultRequestHeaders.Add("User-Agent", "HomuraWatcher");
-            
+            Client.DefaultRequestHeaders.Add("X-ACCESS-TOKEN", Environment.GetEnvironmentVariable("HOMURA_API_TOKEN"));
+
             while (true)
             {
                 try

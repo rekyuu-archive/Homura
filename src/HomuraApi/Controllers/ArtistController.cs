@@ -30,6 +30,8 @@ namespace HomuraApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Artist>>> GetArtists()
         {
+            if (!IsAuthorized()) return Unauthorized();
+
             List<Artist> artists = await _context.Artists.ToListAsync();
 
             foreach (Artist artist in artists)
@@ -44,6 +46,8 @@ namespace HomuraApi.Controllers
         [HttpGet("{id:long}")]
         public async Task<ActionResult<Artist>> GetArtist(long id)
         {
+            if (!IsAuthorized()) return Unauthorized();
+
             Artist artist = await _context.Artists.FindAsync(id);
 
             if (artist == null)
@@ -61,6 +65,8 @@ namespace HomuraApi.Controllers
         [HttpPut("{id:long}")]
         public async Task<IActionResult> PutArtist(long id, Artist artist)
         {
+            if (!IsAuthorized()) return Unauthorized();
+
             if (id != artist.TwitterId)
             {
                 return BadRequest();
@@ -92,6 +98,8 @@ namespace HomuraApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Artist>> PostArtist(Artist artist)
         {
+            if (!IsAuthorized()) return Unauthorized();
+
             await artist.Initialize(_client);
             
             if (artist.TwitterId == 0)
@@ -125,6 +133,8 @@ namespace HomuraApi.Controllers
         [HttpDelete("{id:long}")]
         public async Task<IActionResult> DeleteArtist(long id)
         {
+            if (!IsAuthorized()) return Unauthorized();
+
             Artist artist = await _context.Artists.FindAsync(id);
             if (artist == null)
             {
@@ -135,6 +145,14 @@ namespace HomuraApi.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private bool IsAuthorized()
+        {
+            if (!Request.Headers.ContainsKey("X-ACCESS-TOKEN")) return false;
+            if (Request.Headers["X-ACCESS-TOKEN"] != Environment.GetEnvironmentVariable("HOMURA_API_TOKEN")) return false;
+
+            return true;
         }
 
         private bool ArtistExists(long id)
