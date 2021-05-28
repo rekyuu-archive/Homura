@@ -54,8 +54,8 @@ namespace HomuraWatcher
                         await SendTelegramMessage(tweetUrl);
                     }
 
-                    artist.LastProcessedTweetId = artist.Media.Last();
-                    await Put(HomuraApiUrl, artist);
+                    artist.LastProcessedTweetId = artist.Media.Max();
+                    await Put($"{HomuraApiUrl}/{artist.TwitterId}", artist);
                 }
                 
                 Thread.Sleep(MinutesBetweenPulls * 60 * 1000);
