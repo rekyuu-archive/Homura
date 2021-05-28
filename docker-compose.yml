@@ -19,6 +19,8 @@ services:
     build:
       context: .
       dockerfile: src/HomuraWatcher/Dockerfile
+    volumes:
+      -  ./data:/data
     env_file:
       - secrets.env
     depends_on:

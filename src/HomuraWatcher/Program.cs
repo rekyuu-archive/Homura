@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -14,7 +15,8 @@ namespace HomuraWatcher
     {
         private const string HomuraApiUrl = "http://api/api/v1/artist";
         private const int MinutesBetweenPulls = 5;
-        
+        private const string SeedFile = "/data/seed.txt";
+
         private static readonly HttpClient Client = new();
 
         private static async Task Main()
@@ -24,22 +26,7 @@ namespace HomuraWatcher
             Client.DefaultRequestHeaders.Add("User-Agent", "HomuraWatcher");
             Client.DefaultRequestHeaders.Add("X-ACCESS-TOKEN", Environment.GetEnvironmentVariable("HOMURA_API_TOKEN"));
 
-            while (true)
-            {
-                try
-                {
-                    await Seed();
-                    break;
-                }
-                catch (HttpRequestException)
-                {
-                    continue;
-                }
-                catch
-                {
-                    throw;
-                }
-            }
+            await Seed();
             
             while (true)
             {
@@ -65,37 +52,80 @@ namespace HomuraWatcher
 
         private static async Task<T> Get<T>()
         {
-            string response = await Client.GetStringAsync(HomuraApiUrl);
-            return JsonConvert.DeserializeObject<T>(response);
+            while (true)
+            {
+                try
+                {
+                    string response = await Client.GetStringAsync(HomuraApiUrl);
+                    return JsonConvert.DeserializeObject<T>(response);
+                }
+                catch (HttpRequestException)
+                {
+                    continue;
+                }
+                catch
+                {
+                    throw;
+                }
+            }
         }
 
         private static async Task Post(string url, object body = null)
         {
-            await Client.PostAsJsonAsync(url, body);
+            while (true)
+            {
+                try
+                {
+                    _ = await Client.PostAsJsonAsync(url, body);
+                    break;
+                }
+                catch (HttpRequestException)
+                {
+                    continue;
+                }
+                catch
+                {
+                    throw;
+                }
+            }
         }
 
         private static async Task Put(string url, object body)
         {
-            await Client.PutAsJsonAsync(url, body);
+            while (true)
+            {
+                try
+                {
+                    _ = await Client.PutAsJsonAsync(url, body);
+                    break;
+                }
+                catch (HttpRequestException)
+                {
+                    continue;
+                }
+                catch
+                {
+                    throw;
+                }
+            }
         }
 
         private static async Task Seed()
         {
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/sanohito_mmd"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/Typpo8"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/NLO28636331"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/DirtyEro"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/SunsetSkyline1"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/squeezabledraws"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/bitibitixxxx"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/TostantanNSFW"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/yuka_nya_ff14"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/bigrbear"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/bartolomeobari2"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/ricegnat"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/Waero_Re"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/ydh2101_18"));
-            await Post(HomuraApiUrl, new Artist("https://twitter.com/neko__nsfw"));
+            FileInfo info = new(SeedFile);
+            if (!info.Exists) return;
+
+            using StreamReader reader = new(SeedFile);
+            {
+                string twitterUrl;
+                while ((twitterUrl = reader.ReadLine()) != null)
+                {
+                    await Post(HomuraApiUrl, new Artist(twitterUrl));
+                }
+            }
+
+            string seededFile = $"/data/seeded_{DateTimeOffset.Now.ToUnixTimeSeconds()}.txt";
+            File.Move(SeedFile, seededFile);
         }
 
         private static async Task SendTelegramMessage(string message)

@@ -4,7 +4,9 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
 # Docker Items
-[Dd]ata/
+data/homura.db
+data/seed.txt
+data/seeded_*.txt
 secrets.env
 
 # User-specific files
