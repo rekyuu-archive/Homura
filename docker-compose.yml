@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   api:
-    image: ${DOCKER_REGISTRY-}homuraapi
+    image: rekyuu/homuraapi:${HOMURA_API_VERSION}
     build:
       context: .
       dockerfile: src/HomuraApi/Dockerfile
@@ -15,7 +15,7 @@ services:
       - secrets.env
 
   watcher:
-    image: ${DOCKER_REGISTRY-}homurawatcher
+    image: rekyuu/homurawatcher:${HOMURA_API_VERSION}
     build:
       context: .
       dockerfile: src/HomuraWatcher/Dockerfile
