@@ -5,8 +5,6 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-RUN mkdir -p /data
-
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["src/HomuraApi/HomuraApi.csproj", "src/HomuraApi/"]
